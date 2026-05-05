@@ -3,6 +3,7 @@ package com.champlain.soft.game;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -22,7 +23,7 @@ public class Gameboard extends Application {
     private CellType[][] matrix = new CellType[ROWS][COLS];
     private int playerRow = 1, playerCol = 1;
     private int princessRow, princessCol;
-    private boolean gameActive = true;
+    private boolean gameActive = true;  // CHECKPOINT 6: Game state
     private GridPane gridPane;
 
     private Image grassImage;
@@ -52,10 +53,15 @@ public class Gameboard extends Application {
 
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
 
-        // MOVEMENT CONTROLS
         scene.setOnKeyPressed(event -> {
-            if (gameActive) {
-                handleMovement(event.getCode());
+            if (gameActive) {  // Only move if game is active
+                switch (event.getCode()) {
+                    case UP: movePlayer(-1, 0); break;
+                    case DOWN: movePlayer(1, 0); break;
+                    case LEFT: movePlayer(0, -1); break;
+                    case RIGHT: movePlayer(0, 1); break;
+                    default: break;
+                }
             }
         });
 
@@ -78,7 +84,6 @@ public class Gameboard extends Application {
     private void initMatrix() {
         Random rand = new Random();
 
-        // Initialize all as GRASS
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLS; c++) {
                 matrix[r][c] = CellType.GRASS;
@@ -99,14 +104,14 @@ public class Gameboard extends Application {
         playerCol = 1;
         matrix[playerRow][playerCol] = CellType.PLAYER;
 
-        // Random princess
+        // Princess randomly placed
         do {
             princessRow = rand.nextInt(ROWS);
             princessCol = rand.nextInt(COLS);
         } while (matrix[princessRow][princessCol] != CellType.GRASS);
         matrix[princessRow][princessCol] = CellType.PRINCESS;
 
-        // 5 Bombs randomly placed
+        // CHECKPOINT 6: Bombs visible for testing
         int bombCount = 5;
         int placedBombs = 0;
         while (placedBombs < bombCount) {
@@ -140,7 +145,7 @@ public class Gameboard extends Application {
                         imageView.setImage(princessImage);
                         break;
                     case BOMB:
-                        imageView.setImage(bombImage);
+                        imageView.setImage(bombImage);  // CHECKPOINT 6: Visible
                         break;
                     default:
                         imageView.setImage(grassImage);
@@ -152,32 +157,26 @@ public class Gameboard extends Application {
         }
     }
 
-    private void handleMovement(KeyCode key) {
-        int newRow = playerRow;
-        int newCol = playerCol;
-
-        switch (key) {
-            case UP: newRow--; break;
-            case DOWN: newRow++; break;
-            case LEFT: newCol--; break;
-            case RIGHT: newCol++; break;
-            default: return;
+    private void movePlayer(int deltaRow, int deltaCol) {
+        if (!gameActive) {
+            return;
         }
 
-        // Check bounds
+        int newRow = playerRow + deltaRow;
+        int newCol = playerCol + deltaCol;
+
         if (newRow < 0 || newRow >= ROWS || newCol < 0 || newCol >= COLS) {
             return;
         }
 
-        // Check wall collision
         if (matrix[newRow][newCol] == CellType.WALL) {
             return;
         }
 
-        // Check bomb collision - GAME OVER
+        // CHECKPOINT 6: Bomb collision
         if (matrix[newRow][newCol] == CellType.BOMB) {
             gameActive = false;
-            showGameOver("💥 GAME OVER! You stepped on a bomb!", false);
+            showGameOver("GAME OVER! You stepped on a bomb!");
             return;
         }
 
@@ -189,16 +188,25 @@ public class Gameboard extends Application {
 
         drawBoard(gridPane);
 
-        // Check win condition - RESCUED PRINCESS
+        // Win condition
         if (playerRow == princessRow && playerCol == princessCol) {
             gameActive = false;
-            showGameOver("🎉 YOU WIN! You rescued the princess! 🎉", true);
+            showWinMessage();
         }
     }
 
-    private void showGameOver(String message, boolean isWin) {
-        Alert alert = new Alert(isWin ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
-        alert.setTitle(isWin ? "Victory!" : "Game Over");
+    private void showWinMessage() {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Victory!");
+        alert.setHeaderText(null);
+        alert.setContentText("YOU WIN! You rescued the princess!");
+        alert.showAndWait();
+    }
+
+    // CHECKPOINT 6: Game over method
+    private void showGameOver(String message) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle("Game Over");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
