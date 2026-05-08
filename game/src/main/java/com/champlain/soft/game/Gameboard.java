@@ -146,7 +146,7 @@ public class Gameboard extends Application {
                         imageView.setImage(princessImage);
                         break;
                     case BOMB:
-                        imageView.setImage(bombImage);
+                        imageView.setImage(grassImage);
                         break;
                     default:
                         imageView.setImage(grassImage);
@@ -191,10 +191,10 @@ public class Gameboard extends Application {
                 stage.setTitle("Rescue the Princess - Lives: " + lives);
 
                 // Reset player position to [1,1]
-                matrix[playerRow][playerCol] = CellType.GRASS;
-                playerRow = 1;
-                playerCol = 1;
-                matrix[playerRow][playerCol] = CellType.PLAYER;
+               // matrix[playerRow][playerCol] = CellType.GRASS;
+                //playerRow = 1;
+                //playerCol = 1;
+                //matrix[playerRow][playerCol] = CellType.PLAYER;
 
                 drawBoard(gridPane);
             } else {
