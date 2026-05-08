@@ -23,7 +23,7 @@ public class Gameboard extends Application {
     private CellType[][] matrix = new CellType[ROWS][COLS];
     private int playerRow = 1, playerCol = 1;
     private int princessRow, princessCol;
-    private boolean gameActive = true;  // CHECKPOINT 6: Game state
+    private boolean gameActive = true;  // CHECKPOINT 7: Controls movement
     private GridPane gridPane;
 
     private Image grassImage;
@@ -53,8 +53,9 @@ public class Gameboard extends Application {
 
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
 
+        // CHECKPOINT 7: Movement only allowed if gameActive is true
         scene.setOnKeyPressed(event -> {
-            if (gameActive) {  // Only move if game is active
+            if (gameActive) {
                 switch (event.getCode()) {
                     case UP: movePlayer(-1, 0); break;
                     case DOWN: movePlayer(1, 0); break;
@@ -111,7 +112,7 @@ public class Gameboard extends Application {
         } while (matrix[princessRow][princessCol] != CellType.GRASS);
         matrix[princessRow][princessCol] = CellType.PRINCESS;
 
-        // CHECKPOINT 6: Bombs visible for testing
+        // Bombs visible for testing
         int bombCount = 5;
         int placedBombs = 0;
         while (placedBombs < bombCount) {
@@ -145,7 +146,7 @@ public class Gameboard extends Application {
                         imageView.setImage(princessImage);
                         break;
                     case BOMB:
-                        imageView.setImage(bombImage);  // CHECKPOINT 6: Visible
+                        imageView.setImage(bombImage);
                         break;
                     default:
                         imageView.setImage(grassImage);
@@ -158,6 +159,7 @@ public class Gameboard extends Application {
     }
 
     private void movePlayer(int deltaRow, int deltaCol) {
+        // CHECKPOINT 7: If game is over, do nothing
         if (!gameActive) {
             return;
         }
@@ -173,9 +175,9 @@ public class Gameboard extends Application {
             return;
         }
 
-        // CHECKPOINT 6: Bomb collision
+        // Bomb collision - GAME OVER
         if (matrix[newRow][newCol] == CellType.BOMB) {
-            gameActive = false;
+            gameActive = false;  // CHECKPOINT 7: Stop all movement
             showGameOver("GAME OVER! You stepped on a bomb!");
             return;
         }
@@ -190,7 +192,7 @@ public class Gameboard extends Application {
 
         // Win condition
         if (playerRow == princessRow && playerCol == princessCol) {
-            gameActive = false;
+            gameActive = false;  // CHECKPOINT 7: Stop all movement
             showWinMessage();
         }
     }
@@ -203,7 +205,6 @@ public class Gameboard extends Application {
         alert.showAndWait();
     }
 
-    // CHECKPOINT 6: Game over method
     private void showGameOver(String message) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Game Over");
