@@ -23,7 +23,8 @@ public class Gameboard extends Application {
     private CellType[][] matrix = new CellType[ROWS][COLS];
     private int playerRow = 1, playerCol = 1;
     private int princessRow, princessCol;
-    private boolean gameActive = true;  // CHECKPOINT 7: Controls movement
+    private boolean gameActive = true;
+    private int lives = 3;  // ✅ 3 LIVES
     private GridPane gridPane;
 
     private Image grassImage;
@@ -53,7 +54,6 @@ public class Gameboard extends Application {
 
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
 
-        // CHECKPOINT 7: Movement only allowed if gameActive is true
         scene.setOnKeyPressed(event -> {
             if (gameActive) {
                 switch (event.getCode()) {
@@ -66,7 +66,7 @@ public class Gameboard extends Application {
             }
         });
 
-        stage.setTitle("Rescue the Princess");
+        stage.setTitle("Rescue the Princess - Lives: " + lives);
         stage.setScene(scene);
         stage.show();
         gridPane.requestFocus();
@@ -112,7 +112,7 @@ public class Gameboard extends Application {
         } while (matrix[princessRow][princessCol] != CellType.GRASS);
         matrix[princessRow][princessCol] = CellType.PRINCESS;
 
-        // Bombs visible for testing
+        // 5 Bombs
         int bombCount = 5;
         int placedBombs = 0;
         while (placedBombs < bombCount) {
@@ -159,7 +159,6 @@ public class Gameboard extends Application {
     }
 
     private void movePlayer(int deltaRow, int deltaCol) {
-        // CHECKPOINT 7: If game is over, do nothing
         if (!gameActive) {
             return;
         }
@@ -175,10 +174,34 @@ public class Gameboard extends Application {
             return;
         }
 
-        // Bomb collision - GAME OVER
+        // ✅ BOMB COLLISION WITH LIVES
         if (matrix[newRow][newCol] == CellType.BOMB) {
-            gameActive = false;  // CHECKPOINT 7: Stop all movement
-            showGameOver("GAME OVER! You stepped on a bomb!");
+            lives--;
+
+            if (lives > 0) {
+                // Show remaining lives
+                Alert alert = new Alert(AlertType.WARNING);
+                alert.setTitle("Bomb!");
+                alert.setHeaderText(null);
+                alert.setContentText("You stepped on a bomb! " + lives + " lives remaining.");
+                alert.showAndWait();
+
+                // Update window title
+                Stage stage = (Stage) gridPane.getScene().getWindow();
+                stage.setTitle("Rescue the Princess - Lives: " + lives);
+
+                // Reset player position to [1,1]
+                matrix[playerRow][playerCol] = CellType.GRASS;
+                playerRow = 1;
+                playerCol = 1;
+                matrix[playerRow][playerCol] = CellType.PLAYER;
+
+                drawBoard(gridPane);
+            } else {
+                // Game over - no lives left
+                gameActive = false;
+                showGameOver("GAME OVER! You ran out of lives!");
+            }
             return;
         }
 
@@ -192,7 +215,7 @@ public class Gameboard extends Application {
 
         // Win condition
         if (playerRow == princessRow && playerCol == princessCol) {
-            gameActive = false;  // CHECKPOINT 7: Stop all movement
+            gameActive = false;
             showWinMessage();
         }
     }
